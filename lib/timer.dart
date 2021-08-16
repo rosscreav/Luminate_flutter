@@ -168,6 +168,7 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                         color: const Color(0xff707070)),
                                   ),
                                   Stack(
+                                    alignment: Alignment.center,
                                     children: [
                                       AnimatedOpacity(
                                           opacity: compPhase ? 1.0 :0.0,
@@ -195,7 +196,6 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                       ),
                                     ],
                                   ),
-
                                   Text(
                                     "35 minutes total",
                                     style: TextStyle(
