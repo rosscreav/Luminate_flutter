@@ -16,12 +16,25 @@ class _Splash extends State<splash> {
   bool tapped = false;
   bool unlocked = false;
 
+  onFingerprintTap() {
+    print("test");
+    setState(() {
+      tapped = !tapped;
+    });
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      setState(() {
+        unlocked = true;
+      });
+    });
+    print("$tapped");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //Build from the center outwards so background can cover bounds
       body: Center(
-        //Main stack for all objects
+          //Main stack for all objects
           child: Stack(
         children: [
           //Main background
@@ -125,61 +138,6 @@ class _Splash extends State<splash> {
           ),
           //Fingerprint and button
           Stack(children: [
-            //Fingerprint container
-            AnimatedOpacity(
-                opacity: unlocked ? 0 : 1,
-                duration: Duration(seconds: 1),
-                //Fingerprint Icon
-                child: Container(
-                    alignment: Alignment.bottomCenter,
-                    margin: const EdgeInsets.only(bottom: 150),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        //Pulse animation
-                        AnimatedOpacity(
-                          opacity: tapped ? 1 : 0,
-                          duration: Duration(seconds: 1),
-                          child: Lottie.asset(
-                            "assets/animations/cyan_pulse.json",
-                            width: 100,
-                            height: 100,
-                            animate: tapped,
-                          ),
-                        ),
-                        //Fingerprint
-                        GestureDetector(
-                            onTap: () {
-                              print("test");
-                              setState(() {
-                                tapped = !tapped;
-                              });
-                              Future.delayed(const Duration(milliseconds: 3000),
-                                  () {
-                                setState(() {
-                                  unlocked = true;
-                                });
-                              });
-                              print("$tapped");
-                            }, // handle your image tap here
-                            child: ColorFiltered(
-                              colorFilter: tapped
-                                  ? ColorFilter.mode(
-                                      Colors.cyan, BlendMode.srcIn)
-                                  : ColorFilter.mode(
-                                      Colors.blue, BlendMode.dst),
-                              child: Image.asset(
-                                'assets/images/fingerprint_icon.png',
-                                //color: tapped ? const Color(0xffffffff) : const Color(0xff00ccff),
-                                //colorBlendMode: BlendMode.multiply,
-
-                                fit: BoxFit
-                                    .cover, // this is the solution for border
-                                scale: 3,
-                              ),
-                            )),
-                      ],
-                    ))),
             //Button
             AnimatedOpacity(
                 opacity: unlocked ? 1 : 0,
@@ -220,7 +178,56 @@ class _Splash extends State<splash> {
                                 fontSize: 25,
                                 color: Colors.white),
                           ),
-                        ))))
+                        )))),
+            //Fingerprint container
+            AnimatedOpacity(
+                opacity: unlocked ? 0 : 1,
+                duration: Duration(seconds: 1),
+                //Fingerprint Icon
+                child: Visibility(
+                    visible: !unlocked,
+                    child: Container(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.bottomCenter,
+                        margin: const EdgeInsets.only(bottom: 150),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            //Pulse animation
+                            AnimatedOpacity(
+                              opacity: tapped ? 1 : 0,
+                              duration: Duration(seconds: 1),
+                              child: Lottie.asset(
+                                "assets/animations/cyan_pulse.json",
+                                width: 100,
+                                height: 100,
+                                animate: tapped,
+                              ),
+                            ),
+                            //Fingerprint
+                            GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTapDown: (TapDownDetails details) =>
+                                    onFingerprintTap(), // handle your image tap here
+                                child: ColorFiltered(
+                                  colorFilter: tapped
+                                      ? ColorFilter.mode(
+                                          Colors.cyan, BlendMode.srcIn)
+                                      : ColorFilter.mode(
+                                          Colors.blue, BlendMode.dst),
+                                  child: Image.asset(
+                                    'assets/images/fingerprint_icon.png',
+                                    //color: tapped ? const Color(0xffffffff) : const Color(0xff00ccff),
+                                    //colorBlendMode: BlendMode.multiply,
+
+                                    fit: BoxFit
+                                        .cover, // this is the solution for border
+                                    scale: 3,
+                                  ),
+                                )),
+                          ],
+                        )))),
           ])
         ],
       )),
