@@ -148,7 +148,7 @@ class _Splash extends State<splash> {
                     margin: const EdgeInsets.only(bottom: 150),
                     //Container for button size
                     child: Container(
-                        height: 60,
+                        height: 50,
                         width: 200,
                         //Start button
                         child: ElevatedButton(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
@@ -13,28 +14,55 @@ class treatment_timer extends StatefulWidget {
 }
 
 class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
-  final mainProgress = CountDownController();
-  final secondProgress = CountDownController();
+  final recoveryProgress = CountDownController();
+  final compressionProgress = CountDownController();
   late AnimationController _tickController;
   bool placeholder = true;
   bool done = false;
   bool compPhase = true;
   bool recoverPhase = false;
 
-  String timer_value = "20 minutes";
-  String timer2_value = "5 minutes";
+  int compressionTimerLength = 10;
+  int recoveryTimerLength = 5;
+  String compressionText = "10 minutes";
+  String recoveryText = "5 minutes";
 
+  //Create a tick controller for the animation and timer for updating text
   @override
   void initState(){
     super.initState();
     _tickController = AnimationController(vsync: this, duration: Duration(seconds: 1));
+    new Timer.periodic(const Duration(milliseconds: 500), (Timer t) => updateTime());
+  }
 
+  //Update the amount of minutes remaining
+  updateTime(){
+    //Stop when unmounted (overflow precaution)
+    if(mounted) {
+      //If in the compression phase
+      if (recoverPhase == false) {
+        var time = compressionTimerLength -
+            int.parse(compressionProgress.getTime()) - 1;
+        if(time == -1) {time = 0;}
+        setState(() {
+          compressionText = "$time minutes";
+        });
+      }
+      //In the recovery phase
+      else {
+        var time = recoveryTimerLength -
+            int.parse(recoveryProgress.getTime()) - 1;
+        if(time == -1) {time = 0;}
+        setState(() {
+          recoveryText = "$time minutes";
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
 
-    //mainProgress.getTime();
     return Scaffold(
       body: SafeArea(
           child: Container(
@@ -72,11 +100,11 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                 //Time
                                 //Green bar
                                 CircularCountDownTimer(
-                                  duration: 10,
+                                  duration: compressionTimerLength,
                                   initialDuration: 0,
-                                  controller: secondProgress,
-                                  width: 250,
-                                  height: 250,
+                                  controller: compressionProgress,
+                                  width: 280,
+                                  height: 280,
                                   ringColor: const Color(0xffB8D8D8),
                                   ringGradient: null,
                                   fillColor: const Color(0xff2EC4B6),
@@ -105,7 +133,8 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                     Future.delayed(const Duration(milliseconds: 1000), () {
                                     setState(() {
                                       recoverPhase = true;
-                                      mainProgress.start();
+                                      recoveryProgress.start();
+                                      print(compressionProgress.getTime());
                                     });
                                     });
 
@@ -115,18 +144,18 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                 ),
                                 //Blue bar
                                 CircularCountDownTimer(
-                                  duration: 10,
+                                  duration: recoveryTimerLength,
                                   initialDuration: 0,
-                                  controller: mainProgress,
-                                  width: 250,
-                                  height: 250,
-                                  ringColor: const Color(0x0000000),
+                                  controller: recoveryProgress,
+                                  width: 240,
+                                  height: 240,
+                                  ringColor: const Color(0xff8fc5d9),
                                   ringGradient: null,
                                   fillColor: const Color(0xff00A3DC),
                                   fillGradient: null,
                                   backgroundColor: null,
                                   backgroundGradient: null,
-                                  strokeWidth: 18.0,
+                                  strokeWidth: 12.0,
                                   strokeCap: StrokeCap.square,
                                   textStyle: TextStyle(
                                       fontSize: 33.0,
@@ -164,7 +193,7 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontFamily: 'sergoe_ui',
-                                        fontSize: 20,
+                                        fontSize: 17,
                                         color: const Color(0xff707070)),
                                   ),
                                   Stack(
@@ -174,7 +203,7 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                           opacity: compPhase ? 1.0 :0.0,
                                           duration: Duration(seconds: 1),
                                           child:Text(
-                                            timer_value,
+                                            compressionText,
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                                 fontFamily: 'sergoe_ui',
@@ -186,7 +215,7 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                         opacity: recoverPhase ? 1.0 :0.0,
                                         duration: Duration(seconds: 1),
                                         child:Text(
-                                          timer2_value,
+                                          recoveryText,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                               fontFamily: 'sergoe_ui',
@@ -197,10 +226,10 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                     ],
                                   ),
                                   Text(
-                                    "35 minutes total",
+                                    "${recoveryTimerLength+compressionTimerLength} minutes total",
                                     style: TextStyle(
                                         fontFamily: 'sergoe_ui',
-                                        fontSize: 20,
+                                        fontSize: 17,
                                         color: const Color(0xff707070)),
                                   ),
                                 ]),
