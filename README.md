@@ -1,7 +1,7 @@
 # luminate_flutter
 
 
-## Getting Started
+## Overview
 
 This project is an looks like prototype for the Lily medical device.
 
