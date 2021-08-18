@@ -1,11 +1,11 @@
+//Imports
 import 'dart:async';
-import 'dart:io';
-
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+//Allow for calls of an instance of the Widget
 class treatment_timer extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -13,46 +13,69 @@ class treatment_timer extends StatefulWidget {
   }
 }
 
-class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
+//Widget Class
+class _TimerState extends State<treatment_timer> with TickerProviderStateMixin {
+  //Controller for the progress indicators
   final recoveryProgress = CountDownController();
   final compressionProgress = CountDownController();
-  late AnimationController _tickController;
-  bool placeholder = true;
-  bool done = false;
-  bool compPhase = true;
-  bool recoverPhase = false;
+  //Animation controller for lottie animation
+  late AnimationController _tickAnimationController;
 
+  //Booleans for animated transitions
+  //First phase with compression text and green timer tracked
+  bool compPhase = true;
+  //Second phase with recovery text and blue timer tracked
+  bool recoverPhase = false;
+  //Final state of the screen on timer completion
+  bool done = false;
+
+  //Variables used to control length of each timer in seconds
   int compressionTimerLength = 10;
   int recoveryTimerLength = 5;
+  //Text variables for time real time timers
   String compressionText = "10 minutes";
   String recoveryText = "5 minutes";
 
   //Create a tick controller for the animation and timer for updating text
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    _tickController = AnimationController(vsync: this, duration: Duration(seconds: 1));
-    new Timer.periodic(const Duration(milliseconds: 500), (Timer t) => updateTime());
+    //Animation length is one second
+    _tickAnimationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 1));
+    //Create a timer to update the trackers every 500 ms
+    new Timer.periodic(
+        const Duration(milliseconds: 500), (Timer t) => updateTime());
   }
 
   //Update the amount of minutes remaining
-  updateTime(){
-    //Stop when unmounted (overflow precaution)
-    if(mounted) {
+  updateTime() {
+    //Stop when unmounted (overflow precaution to stop when not drawn)
+    if (mounted) {
       //If in the compression phase
       if (recoverPhase == false) {
-        var time = compressionTimerLength -
-            int.parse(compressionProgress.getTime()) - 1;
-        if(time == -1) {time = 0;}
+        //Calculate the time left and round down by taking away 1
+        var time =
+            compressionTimerLength - int.parse(compressionProgress.getTime()) - 1;
+        //When timer hits 0 display 0 instead of -1
+        if (time == -1) {
+          time = 0;
+        }
+        //Update the timer text
         setState(() {
           compressionText = "$time minutes";
         });
       }
-      //In the recovery phase
+      //Else in the recovery phase
       else {
-        var time = recoveryTimerLength -
-            int.parse(recoveryProgress.getTime()) - 1;
-        if(time == -1) {time = 0;}
+        //Calculate the time left and round down by taking away 1
+        var time =
+            recoveryTimerLength - int.parse(recoveryProgress.getTime()) - 1;
+        //When timer hits 0 display 0 instead of -1
+        if (time == -1) {
+          time = 0;
+        }
+        //Update the timer text
         setState(() {
           recoveryText = "$time minutes";
         });
@@ -60,45 +83,52 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
     }
   }
 
+  //Build the widget
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
+      //Only display widgets within the safe area
       body: SafeArea(
+          //Main container aligned to the center of the screen and containing a white background
           child: Container(
               alignment: Alignment.center,
               color: Colors.white,
+              //Column to place all widgets within to work down the screen
               child: new Column(
                 children: [
-                  //Top left Icon
+                  //Image with the bubbles placed at the screen start
                   Image.asset("assets/images/bubble_bar.png"),
-                  //Progress bar stack
+                  //Progress bar Container
                   Container(
+                      //Offset 50 pixels away from the image
                       margin: const EdgeInsets.only(top: 50.0),
+                      //Stack for all progress bar items and internal text
                       child: Stack(
+                        //Align all children to the center of the stack
                         alignment: Alignment.center,
                         children: [
-                          //Tick animation
+                          //Lottie Tick animation (plays on completion)
                           AnimatedOpacity(
+                              //Only display when done is true
                               opacity: done ? 1.0 : 0.0,
                               duration: Duration(seconds: 1),
                               child: Lottie.asset(
                                 "assets/animations/tick.json",
-                                controller: _tickController,
+                                controller: _tickAnimationController,
                                 width: 250,
                                 height: 250,
                                 repeat: true,
                                 alignment: Alignment.center,
                               )),
-                          //Progress bar container,
+                          //Timer container
                           AnimatedOpacity(
+                            //Display until done is true
                             opacity: done ? 0.0 : 1.0,
                             duration: Duration(seconds: 1),
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                //Time
-                                //Green bar
+                                //Compression Timer (Green)
                                 CircularCountDownTimer(
                                   duration: compressionTimerLength,
                                   initialDuration: 0,
@@ -113,42 +143,37 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                   backgroundGradient: null,
                                   strokeWidth: 18.0,
                                   strokeCap: StrokeCap.square,
-                                  textStyle: TextStyle(
-                                      fontSize: 33.0,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                  textFormat: CountdownTextFormat.S,
+                                  //Hide the in-built timer text
+                                  textStyle: TextStyle(fontSize: 0),
                                   isReverse: false,
                                   isReverseAnimation: false,
                                   isTimerTextShown: true,
                                   autoStart: true,
-                                  onStart: () {
-                                    print('Countdown Started');
-                                  },
-                                  //Comp phase done
+                                  //Compression timer completion method
                                   onComplete: () {
+                                    //Start transition to next phase
                                     setState(() {
                                       compPhase = false;
                                     });
+                                    //Wait 1 second for animations to finish (avoid cross-fade)
                                     Future.delayed(const Duration(milliseconds: 1000), () {
-                                    setState(() {
-                                      recoverPhase = true;
-                                      recoveryProgress.start();
-                                      print(compressionProgress.getTime());
+                                      setState(() {
+                                        //Call in new text
+                                        recoverPhase = true;
+                                        //Start the recovery timer
+                                        recoveryProgress.start();
+                                      });
                                     });
-                                    });
-
-
-                                    print('Countdown Ended');
                                   },
                                 ),
-                                //Blue bar
+
+                                //Recovery Timer (Blue)
                                 CircularCountDownTimer(
                                   duration: recoveryTimerLength,
                                   initialDuration: 0,
                                   controller: recoveryProgress,
-                                  width: 240,
-                                  height: 240,
+                                  width: 250,
+                                  height: 250,
                                   ringColor: const Color(0xff8fc5d9),
                                   ringGradient: null,
                                   fillColor: const Color(0xff00A3DC),
@@ -157,31 +182,27 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                   backgroundGradient: null,
                                   strokeWidth: 12.0,
                                   strokeCap: StrokeCap.square,
-                                  textStyle: TextStyle(
-                                      fontSize: 33.0,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                  textFormat: CountdownTextFormat.S,
+                                  //Hide the in-built timer text
+                                  textStyle: TextStyle(fontSize: 0),
                                   isReverse: false,
                                   isReverseAnimation: false,
                                   isTimerTextShown: true,
                                   autoStart: false,
-                                  onStart: () {
-                                    print('Countdown Started');
-                                  },
-                                  //Recover phase done
+                                  //Recovery timer completion method
                                   onComplete: () {
+                                    //Start transition to next phase
                                     setState(() {
                                       recoverPhase = false;
-
                                     });
-                                    Future.delayed(const Duration(milliseconds: 1000), () {
+                                    Future.delayed(
+                                        const Duration(milliseconds: 1000), () {
                                       setState(() {
-                                      done = true;
+                                        done = true;
                                       });
                                     });
-                                    Future.delayed(const Duration(milliseconds: 2000), () {
-                                      _tickController.forward();
+                                    Future.delayed(
+                                        const Duration(milliseconds: 2000), () {
+                                      _tickAnimationController.forward();
                                     });
 
                                     print('Countdown Ended');
@@ -200,21 +221,21 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                     alignment: Alignment.center,
                                     children: [
                                       AnimatedOpacity(
-                                          opacity: compPhase ? 1.0 :0.0,
-                                          duration: Duration(seconds: 1),
-                                          child:Text(
-                                            compressionText,
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                fontFamily: 'sergoe_ui',
-                                                fontSize: 35,
-                                                color: const Color(0xff707070)),
-                                          ),
+                                        opacity: compPhase ? 1.0 : 0.0,
+                                        duration: Duration(seconds: 1),
+                                        child: Text(
+                                          compressionText,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontFamily: 'sergoe_ui',
+                                              fontSize: 35,
+                                              color: const Color(0xff707070)),
+                                        ),
                                       ),
                                       AnimatedOpacity(
-                                        opacity: recoverPhase ? 1.0 :0.0,
+                                        opacity: recoverPhase ? 1.0 : 0.0,
                                         duration: Duration(seconds: 1),
-                                        child:Text(
+                                        child: Text(
                                           recoveryText,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
@@ -226,15 +247,13 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                     ],
                                   ),
                                   Text(
-                                    "${recoveryTimerLength+compressionTimerLength} minutes total",
+                                    "${recoveryTimerLength + compressionTimerLength} minutes total",
                                     style: TextStyle(
                                         fontFamily: 'sergoe_ui',
                                         fontSize: 17,
                                         color: const Color(0xff707070)),
                                   ),
                                 ]),
-
-
                               ],
                             ),
                           )
@@ -304,7 +323,8 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                                       fontSize: 30,
                                       color: const Color(0xff424242)),
                                 ),
-                                Text("You have finished another Lily session ! You can now remove the device.",
+                                Text(
+                                    "You have finished another Lily session ! You can now remove the device.",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontFamily: 'sergoe_ui',
@@ -337,6 +357,7 @@ class _TimerState extends State<treatment_timer> with TickerProviderStateMixin{
                       ))
                 ],
               ))),
+      //Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0, // this will be set when a new tab is tapped
         showSelectedLabels: false,
