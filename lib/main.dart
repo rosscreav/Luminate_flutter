@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 //Importing different screens
 import 'home.dart';
 import 'timer.dart';
-import 'splash.dart';
+import 'lockScreen.dart';
 
 //Create the App object
 void main() => runApp(App());
@@ -20,7 +20,7 @@ class App extends StatelessWidget {
         //Setup routes for each screen for navigation
         routes: {
           '/timer': (context) => TreatmentTimer(),
-          '/splash': (context) => LockScreen(),
+          '/lockscreen': (context) => LockScreen(),
           '/home': (context) => Home(),
         }
     );

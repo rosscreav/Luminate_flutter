@@ -16,6 +16,7 @@ class _HomeState extends State<Home> {
   bool stageUnconnected = true;
   bool stageConnected = false;
   bool stageStart = false;
+
   //Variable to allow the same button to be used for all stages
   String buttonText = "CONNECT";
   //Client name
@@ -30,21 +31,19 @@ class _HomeState extends State<Home> {
   Duration fadeTime = const Duration(seconds: 1);
 
   //Set the opacity of different Text sections and images
-  //This screen is divided into three stages - Connect , Connected, Start
-  changeOpacity(BuildContext context) {
+  //This screen is divided into three stages - Connect, Connected, Start
+  changeWidgets(BuildContext context) {
     //Connect => Connected Transition
     if(stageUnconnected){
-    //Fade out unconnected and set button text to next
-    setState(() {
-      stageUnconnected = false;
-      buttonText = "NEXT";
-    });
-    //Wait for animation and load new text and image
-    Future.delayed(fadeTime, () {
+      //Fade out unconnected and set button text to next
       setState(() {
-        stageConnected = true;
+        stageUnconnected = false;
+        buttonText = "NEXT";
       });
-    });
+      //Wait for animation and load new text and image
+      Future.delayed(fadeTime, () {
+        setState(() {stageConnected = true;});
+      });
     //Connected => Start Transition
     }else if(stageConnected){
       //Fade out connected and set button text to next
@@ -54,15 +53,13 @@ class _HomeState extends State<Home> {
       });
       //Wait for animation and load new text and image
       Future.delayed(fadeTime, () {
-        setState(() {
-          stageStart = true;
-        });
+        setState(() {stageStart = true;});
       });
     }
     //Transition to the next route
     else{
       setState(() {
-        //Push to timer
+        //Push transition to timer
         Navigator.pushNamed(context, '/timer');
       });
     }
@@ -96,35 +93,41 @@ class _HomeState extends State<Home> {
                       margin: const EdgeInsets.only(top: 20.0, left: 40),
                       alignment: Alignment.topLeft,
                       //Stack to container title text for each stage
-                      child: Stack(children: [
-                        //Hello "name" => text title
-                        AnimatedOpacity(
-                            //Only show during unconnected
-                            opacity: stageUnconnected ? 1.0 : 0.0,
-                            duration: fadeTime,
-                            child: Text(
-                              "Hello, $name",
-                              style: titleTextStyle,
-                            )),
-                        //Success => connected text title
-                        AnimatedOpacity(
-                            //Only show during connected
-                            opacity: stageConnected ? 1.0 : 0.0,
-                            duration: fadeTime,
-                            child: Text(
-                              "Success!",
-                              style: titleTextStyle,
-                            )),
-                        //Awesome => start text title
-                        AnimatedOpacity(
-                            //Only show during start stage
-                            opacity: stageStart ? 1.0 : 0.0,
-                            duration: fadeTime,
-                            child: Text(
-                              "Awesome!",
-                              style: titleTextStyle,
-                            )),
-                      ])),
+                      child: Stack(
+                          children: [
+                          //Hello "name" => text title
+                          AnimatedOpacity(
+                              //Only show during unconnected
+                              opacity: stageUnconnected ? 1.0 : 0.0,
+                              duration: fadeTime,
+                              child: Text(
+                                "Hello, $name",
+                                style: titleTextStyle,
+                              )
+                          ),
+                          //Success => connected text title
+                          AnimatedOpacity(
+                              //Only show during connected
+                              opacity: stageConnected ? 1.0 : 0.0,
+                              duration: fadeTime,
+                              child: Text(
+                                "Success!",
+                                style: titleTextStyle,
+                              )
+                          ),
+                          //Awesome => start text title
+                          AnimatedOpacity(
+                              //Only show during start stage
+                              opacity: stageStart ? 1.0 : 0.0,
+                              duration: fadeTime,
+                              child: Text(
+                                "Awesome!",
+                                style: titleTextStyle,
+                              )
+                          ),
+                        ]
+                      )
+                  ),
                   //Subtext Container
                   Container(
                       //Add margin from left side and the title text as well as limiting text box size
@@ -176,7 +179,8 @@ class _HomeState extends State<Home> {
                             ),
                           )
                         ],
-                      )),
+                      )
+                  ),
                   //Image Container
                   Container(
                     //Offset from Text
@@ -220,7 +224,8 @@ class _HomeState extends State<Home> {
                               "assets/images/bluetooth_connected.png",
                               alignment: Alignment.center,
                               scale: 2.5,
-                            )),
+                            )
+                          ),
                           //Helmet render image
                           AnimatedOpacity(
                             //Only show on start stage
@@ -232,8 +237,8 @@ class _HomeState extends State<Home> {
                               alignment: Alignment.center,
                               scale: 2.8,
                             ))
-                    ]),
-
+                        ]
+                    ),
                   ),
                   //Button Container
                   Container(
@@ -250,12 +255,15 @@ class _HomeState extends State<Home> {
                             RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0),))
                       ),
                       //When checked change the current screen or move on
-                      onPressed: () => changeOpacity(context),
+                      onPressed: () => changeWidgets(context),
                       //Button text
                       child: Text(buttonText, style: buttonTextStyle,),
-                    ))
+                    )
+                  )
                 ],
-              ))),
+              )
+          )
+      ),
       //Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
         //Default to home icon

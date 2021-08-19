@@ -29,9 +29,17 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
   //Final state of the screen on timer completion
   bool done = false;
 
+  //Colors for progress bars
+  Color compBarTrack = const Color(0xffB8D8D8);
+  Color compBarColor = const Color(0xff2EC4B6);
+  Color recoveryBarTrack = const Color(0xff8fc5d9);
+  Color recoveryBarColor = const Color(0xff00A3DC);
+
   //Fade animation durations
   Duration fadeTime = const Duration(seconds: 1);
   Duration tickTime = const Duration(seconds: 1);
+  //Time between minute counter updates
+  Duration timerTickRate = const Duration(milliseconds: 500);
 
   //Variables used to control length of each timer in seconds
   int compressionTimerLength = 10;
@@ -54,11 +62,9 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     //Animation length is one second
-    _tickAnimationController =
-        AnimationController(vsync: this, duration: tickTime);
+    _tickAnimationController = AnimationController(vsync: this, duration: tickTime);
     //Create a timer to update the trackers every 500 ms
-    new Timer.periodic(
-        const Duration(milliseconds: 500), (Timer t) => updateTime());
+    new Timer.periodic(timerTickRate, (Timer t) => updateTime());
   }
 
   //Update the amount of minutes remaining
@@ -68,30 +74,20 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
       //If in the compression phase
       if (recoverPhase == false) {
         //Calculate the time left and round down by taking away 1
-        var time =
-            compressionTimerLength - int.parse(compressionProgress.getTime()) - 1;
+        var time = compressionTimerLength - int.parse(compressionProgress.getTime()) - 1;
         //When timer hits 0 display 0 instead of -1
-        if (time == -1) {
-          time = 0;
-        }
+        if (time == -1) {time = 0;}
         //Update the timer text
-        setState(() {
-          compressionText = "$time minutes";
-        });
+        setState(() {compressionText = "$time minutes";});
       }
       //Else in the recovery phase
       else {
         //Calculate the time left and round down by taking away 1
-        var time =
-            recoveryTimerLength - int.parse(recoveryProgress.getTime()) - 1;
+        var time = recoveryTimerLength - int.parse(recoveryProgress.getTime()) - 1;
         //When timer hits 0 display 0 instead of -1
-        if (time == -1) {
-          time = 0;
-        }
+        if (time == -1) {time = 0;}
         //Update the timer text
-        setState(() {
-          recoveryText = "$time minutes";
-        });
+        setState(() {recoveryText = "$time minutes";});
       }
     }
   }
@@ -132,7 +128,8 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                               height: 250,
                               repeat: true,
                               alignment: Alignment.center,
-                            )),
+                            )
+                        ),
                         //Timer container
                         AnimatedOpacity(
                           //Display until done is true
@@ -148,11 +145,10 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                                 controller: compressionProgress,
                                 width: 280,
                                 height: 280,
-                                ringColor: const Color(0xffB8D8D8),
+                                ringColor: compBarTrack,
                                 ringGradient: null,
-                                fillColor: const Color(0xff2EC4B6),
+                                fillColor: compBarColor,
                                 fillGradient: null,
-                                backgroundColor: Colors.white,
                                 backgroundGradient: null,
                                 strokeWidth: 18.0,
                                 strokeCap: StrokeCap.square,
@@ -162,12 +158,11 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                                 isReverseAnimation: false,
                                 isTimerTextShown: true,
                                 autoStart: true,
+
                                 //Compression timer completion method
                                 onComplete: () {
                                   //Start transition to next phase
-                                  setState(() {
-                                    compPhase = false;
-                                  });
+                                  setState(() {compPhase = false;});
                                   //Wait 1 second for animations to finish (avoid cross-fade)
                                   Future.delayed(const Duration(milliseconds: 1000), () {
                                     setState(() {
@@ -178,6 +173,7 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                                     });
                                   });
                                 },
+
                               ),
                               //Recovery Timer (Blue)
                               CircularCountDownTimer(
@@ -186,9 +182,9 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                                 controller: recoveryProgress,
                                 width: 250,
                                 height: 250,
-                                ringColor: const Color(0xff8fc5d9),
+                                ringColor: recoveryBarTrack,
                                 ringGradient: null,
-                                fillColor: const Color(0xff00A3DC),
+                                fillColor: recoveryBarColor,
                                 fillGradient: null,
                                 backgroundColor: null,
                                 backgroundGradient: null,
@@ -200,17 +196,17 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                                 isReverseAnimation: false,
                                 isTimerTextShown: true,
                                 autoStart: false,
+
                                 //Recovery timer completion method
                                 onComplete: () {
                                   //Start transition to next phase
-                                  setState(() {
-                                    recoverPhase = false;
-                                  });
+                                  setState(() {recoverPhase = false;});
                                   //Wait 1 second for animations to finish (avoid cross-fade)
                                   Future.delayed(const Duration(milliseconds: 1000), () {
                                     setState(() {
                                       //Call in new text
                                       done = true;
+                                      //Set button text to done as fade out
                                       buttonText = "DONE";
                                     });
                                   });
@@ -220,6 +216,7 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                                     _tickAnimationController.forward();
                                   });
                                 },
+
                               ),
                               //Text within the timer
                               Column(
@@ -255,12 +252,14 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                                     "${recoveryTimerLength + compressionTimerLength} minutes total",
                                     style: smallTimerText,
                                   ),
-                              ]),
+                                ]
+                              ),
                             ],
                           ),
                         )
                       ],
-                    )),
+                    )
+                ),
                 //Text Box Container
                 Container(
                     alignment: Alignment.center,
@@ -339,7 +338,8 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                           ),
                         )
                       ],
-                    )),
+                    )
+                ),
                 //Button Container
                 Container(
                   //Offset from text box
@@ -359,18 +359,19 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),
                         //Add a light gray border for contrast
-                        side: BorderSide(width: 1.0, color: const Color(0xf0d1d1d1),),
-                            ))
+                        side: BorderSide(width: 1.0, color: const Color(0xf0d1d1d1),),))
                       ),
                       //On press cancel the screen when working or ignore presses when hidden
                       onPressed: () => done ? Navigator.pop(context) : {},
                       //Button text
                       child: Text(buttonText, style: buttonTextStyle,),
                     ),
-                ),
+                  ),
                 )
               ],
-            ))),
+            )
+          )
+        ),
         //Bottom navigation bar
         bottomNavigationBar: BottomNavigationBar(
           //Default to home icon

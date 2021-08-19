@@ -25,12 +25,12 @@ class _LockScreen extends State<LockScreen> {
   //Text styles
   TextStyle buttonText = const TextStyle(fontFamily: "sofia", fontSize: 25, color: Colors.white);
 
-  //Start the animation for processing the fingerprint
-  //Wait 1500ms and load the button
+  //Start the animation: processing the fingerprint
+  //Wait fingerprintProcessTime and load the button
   onFingerprintTap() {
     //Start the fingerprint animation and color shift
     setState(() {fingerprintLoading = true;});
-    //Wait for some time and call the button and fade the fingerprint
+    //Wait for fingerprintProcessTime and call the button and fade the fingerprint
     Future.delayed(fingerprintProcessTime, () {
       setState(() {unlocked = true;});
     });
@@ -65,7 +65,8 @@ class _LockScreen extends State<LockScreen> {
                 'assets/images/lockbackgroundtop.png',
                 width: double.infinity,
                 fit: BoxFit.cover,
-              )),
+              )
+            ),
             //Top icon group Container
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -147,7 +148,8 @@ class _LockScreen extends State<LockScreen> {
                       ),
                     ),
                   ],
-                )),
+                )
+            ),
             //Logo container
             Container(
               alignment: Alignment.center,
@@ -251,10 +253,11 @@ class _LockScreen extends State<LockScreen> {
                                     : ColorFilter.mode(Colors.blue, BlendMode.dst),
                                 //Fingerprint icon
                                 child: Image.asset('assets/images/fingerprint_icon.png', fit: BoxFit.cover, scale: 3,),
-                              )),
-                            ],
-                          )
+                              )
+                            ),
+                          ],
                         )
+                      )
                     )
                   ),
                ]
