@@ -362,7 +362,7 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
                         side: BorderSide(width: 1.0, color: const Color(0xf0d1d1d1),),))
                       ),
                       //On press cancel the screen when working or ignore presses when hidden
-                      onPressed: () => done ? Navigator.pop(context) : {},
+                      onPressed: () => done ? {} : Navigator.pop(context),
                       //Button text
                       child: Text(buttonText, style: buttonTextStyle,),
                     ),
@@ -374,6 +374,8 @@ class _TimerState extends State<TreatmentTimer> with TickerProviderStateMixin {
         ),
         //Bottom navigation bar
         bottomNavigationBar: BottomNavigationBar(
+          //Even spacing
+          type: BottomNavigationBarType.fixed,
           //Default to home icon
           currentIndex: 0,
           //Don't show the labels

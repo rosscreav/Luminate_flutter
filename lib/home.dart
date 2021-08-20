@@ -266,6 +266,8 @@ class _HomeState extends State<Home> {
       ),
       //Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
+        //Even spacing
+        type: BottomNavigationBarType.fixed,
         //Default to home icon
         currentIndex: 0,
         //Don't show the labels
